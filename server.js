@@ -3,65 +3,37 @@ import cors from "cors";
 import Stripe from "stripe";
 
 const app = express();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe("sk_test_1234567890abcdef"); // coloque sua chave secreta do Stripe aqui
 
 app.use(cors());
 app.use(express.json());
 
-// Rota principal para teste
-app.get("/", (req, res) => {
-  res.send("Servidor Stripe funcionando ✅");
-});
-
-// Criar finalização de compra
 app.post("/checkout", async (req, res) => {
-  const { name, amount } = req.body;
-
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      mode: "payment",
       line_items: [
         {
           price_data: {
             currency: "brl",
-            product_data: { name },
-            unit_amount: amount * 100, // em centavos
+            product_data: {
+              name: "Acesso Premium - A Vinda do Reino",
+            },
+            unit_amount: 1000, // 10 reais em centavos
           },
           quantity: 1,
         },
       ],
-      success_url: "https://servidor-stripe.onrender.com/success",
-      cancel_url: "https://servidor-stripe.onrender.com/cancel",
+      mode: "payment",
+      success_url: "https://geysersite.com/sucesso", // mude se quiser
+      cancel_url: "https://geysersite.com/cancelado",
     });
 
     res.json({ url: session.url });
   } catch (error) {
-    console.error("Erro ao criar sessão:", error);
+    console.error(error);
     res.status(500).json({ error: "Erro ao criar sessão de pagamento" });
   }
-});
-
-// Página de sucesso
-app.get("/success", (req, res) => {
-  res.send(`
-  <body style="font-family: Arial; background:#111; color:#0f0; text-align:center; padding:50px;">
-    <h1>✅ Pagamento realizado com sucesso!</h1>
-    <p>Obrigado por apoiar nosso conteúdo 🙏</p>
-    <button onclick="window.location.href='geyser://app'">Voltar ao app</button>
-  </body>
-  `);
-});
-
-// Página de cancelamento
-app.get("/cancel", (req, res) => {
-  res.send(`
-  <body style="font-family: Arial; background:#111; color:#f00; text-align:center; padding:50px;">
-    <h1>❌ Pagamento cancelado</h1>
-    <p>Você pode tentar novamente quando quiser.</p>
-    <button onclick="window.location.href='geyser://app'">Voltar ao app</button>
-  </body>
-  `);
 });
 
 app.listen(10000, () => console.log("Servidor Stripe rodando na porta 10000"));

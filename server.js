@@ -1,59 +1,49 @@
-// server.js
 import express from "express";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 
 dotenv.config();
-
 const app = express();
+app.use(express.json());
+
+// 🔑 Inicializa Stripe com sua chave secreta
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-app.use(express.json());
-app.use(express.static("public"));
-
-// ✅ Rota principal para verificar se o servidor está online
+// 🔹 Rota principal só pra teste
 app.get("/", (req, res) => {
   res.send("Servidor Stripe funcionando ✅");
 });
 
-// ✅ Rota para criar sessão de pagamento no Stripe
+// 🔹 Rota de checkout
 app.post("/checkout", async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      mode: "payment",
       line_items: [
         {
           price_data: {
             currency: "brl",
             product_data: {
-              name: "Checkout de Teste",
+              name: "Checkout Express",
             },
-            unit_amount: 1000, // R$10,00 (em centavos)
+            unit_amount: 1000, // 💰 10 reais
           },
           quantity: 1,
         },
       ],
+      mode: "payment",
       success_url: "https://stripe.onrender.com/sucesso",
       cancel_url: "https://stripe.onrender.com/cancelado",
     });
 
     res.json({ url: session.url });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
-// ✅ Páginas de retorno após pagamento
-app.get("/sucesso", (req, res) => {
-  res.send("✅ Pagamento concluído com sucesso!");
-});
+// 🔹 Rotas de retorno
+app.get("/sucesso", (req, res) => res.send("✅ Pagamento realizado com sucesso!"));
+app.get("/cancelado", (req, res) => res.send("❌ Pagamento cancelado."));
 
-app.get("/cancelado", (req, res) => {
-  res.send("❌ Pagamento cancelado!");
-});
-
-// ✅ Porta do servidor (Render define automaticamente ou usa 10000)
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Servidor Stripe rodando na porta ${PORT}`));
+app.listen(10000, () => console.log("Servidor Stripe rodando na porta 10000"));

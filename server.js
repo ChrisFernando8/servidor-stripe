@@ -3,7 +3,7 @@ import cors from "cors";
 import Stripe from "stripe";
 
 const app = express();
-const stripe = new Stripe("sk_test_1234567890abcdef"); // coloque sua chave secreta do Stripe aqui
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);"); // coloque sua chave secreta real do Stripe
 
 app.use(cors());
 app.use(express.json());
@@ -36,4 +36,6 @@ app.post("/checkout", async (req, res) => {
   }
 });
 
-app.listen(10000, () => console.log("Servidor Stripe rodando na porta 10000"));
+// Render usa variável de ambiente para a porta:
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`Servidor Stripe rodando na porta ${PORT}`));

@@ -31,16 +31,16 @@
   <button id="checkout-button">Pagar agora</button>
 
   <script>
-    const stripe = Stripe("pk_live_51lSQDdi3dNTBbQvNRG0mwa1wzfiOIkySPbAZFzGUAxrCni3RFSf2MxpkoAZt1iwZL5cDHle4NRoUfT5gjA0sVQMO0pBwk6sE7"); // ✅ sua chave pública
+    const stripe = Stripe("pk_live_511SQbdi3NTBbQvNRG0mwa1wzf1OiKySPbAZFzGUAxrCnI3RFsF2Mxpk0Az1iWzL5cDHLe4NRuOTf");
 
     document.getElementById("checkout-button").addEventListener("click", () => {
-      fetch("/create-checkout-session", {
+      fetch("https://servidor-stripe.onrender.com/create-checkout-session", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" }
       })
-        .then(res => res.json())
-        .then(session => stripe.redirectToCheckout({ sessionId: session.id }))
-        .catch(err => alert("Erro: " + err.message));
+      .then(res => res.json())
+      .then(session => stripe.redirectToCheckout({ sessionId: session.id }))
+      .catch(err => alert("Erro: " + err.message));
     });
   </script>
 </body>

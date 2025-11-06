@@ -3,7 +3,7 @@ import cors from "cors";
 import Stripe from "stripe";
 
 const app = express();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);"); // coloque sua chave secreta real do Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); // coloque sua chave secreta real do Stripe
 
 app.use(cors());
 app.use(express.json());

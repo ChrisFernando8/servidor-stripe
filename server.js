@@ -31,8 +31,8 @@ app.post("/checkout", async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: "https://stripe.onrender.com/success",
-      cancel_url: "https://stripe.onrender.com/cancel",
+      success_url: "https://servidor-stripe.onrender.com/success",
+cancel_url: "https://servidor-stripe.onrender.com/cancel",
     });
 
     res.json({ url: session.url });

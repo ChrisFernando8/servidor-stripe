@@ -1,59 +1,67 @@
 import express from "express";
-import Stripe from "stripe";
-import dotenv from "dotenv";
 import cors from "cors";
-
-dotenv.config();
+import Stripe from "stripe";
 
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-// Rota inicial para teste
+// Rota principal para teste
 app.get("/", (req, res) => {
   res.send("Servidor Stripe funcionando ✅");
 });
 
-// Rota para criar checkout
-app.post("/create-checkout-session", async (req, res) => {
+// Criar checkout
+app.post("/checkout", async (req, res) => {
+  const { name, amount } = req.body;
+
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
+      mode: "payment",
       line_items: [
         {
           price_data: {
             currency: "brl",
-            product_data: {
-              name: "Compra Premium 💎",
-              description: "Acesso completo por apenas R$10,00",
-            },
-            unit_amount: 1000, // R$10,00
+            product_data: { name },
+            unit_amount: amount * 100, // em centavos
           },
           quantity: 1,
         },
       ],
-      mode: "payment",
-      success_url: "https://stripe.onrender.com/sucesso",
-      cancel_url: "https://stripe.onrender.com/cancelado",
+      success_url: "https://stripe.onrender.com/success",
+      cancel_url: "https://stripe.onrender.com/cancel",
     });
 
     res.json({ url: session.url });
   } catch (error) {
-    console.error("Erro ao criar checkout:", error);
+    console.error("Erro ao criar sessão:", error);
     res.status(500).json({ error: "Erro ao criar sessão de pagamento" });
   }
 });
 
-// Páginas de sucesso e cancelamento
-app.get("/sucesso", (req, res) => {
-  res.send("✅ Pagamento realizado com sucesso!");
+// Página de sucesso
+app.get("/success", (req, res) => {
+  res.send(`
+    <body style="font-family: Arial; background:#111; color:#0f0; text-align:center; padding:50px;">
+      <h1>✅ Pagamento realizado com sucesso!</h1>
+      <p>Obrigado por apoiar nosso conteúdo 🙏</p>
+      <button onclick="window.location.href='geyser://app'">Voltar ao app</button>
+    </body>
+  `);
 });
 
-app.get("/cancelado", (req, res) => {
-  res.send("❌ Pagamento cancelado!");
+// Página de cancelamento
+app.get("/cancel", (req, res) => {
+  res.send(`
+    <body style="font-family: Arial; background:#111; color:#f00; text-align:center; padding:50px;">
+      <h1>❌ Pagamento cancelado</h1>
+      <p>Você pode tentar novamente quando quiser.</p>
+      <button onclick="window.location.href='geyser://app'">Voltar ao app</button>
+    </body>
+  `);
 });
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+app.listen(10000, () => console.log("Servidor Stripe rodando na porta 10000"));

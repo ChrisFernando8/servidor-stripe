@@ -1,15 +1,19 @@
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
-import dotenv from "dotenv";
 
-dotenv.config();
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
 app.use(express.json());
 
+// Rota principal — aparece no navegador
+app.get("/", (req, res) => {
+  res.send("Servidor Stripe funcionando ✅");
+});
+
+// Criar sessão de checkout
 app.post("/create-checkout-session", async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
@@ -19,9 +23,7 @@ app.post("/create-checkout-session", async (req, res) => {
         {
           price_data: {
             currency: "brl",
-            product_data: {
-              name: "Checkout",
-            },
+            product_data: { name: "Checkout de teste" },
             unit_amount: 1000, // R$10,00
           },
           quantity: 1,
@@ -32,9 +34,10 @@ app.post("/create-checkout-session", async (req, res) => {
     });
 
     res.json({ url: session.url });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
-app.listen(3000, () => console.log("Servidor Stripe rodando na porta 3000"));
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));

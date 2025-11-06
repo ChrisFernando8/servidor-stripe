@@ -1,21 +1,23 @@
 import express from "express";
 import Stripe from "stripe";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
-const app = express();
-app.use(express.json());
 
-// 🔑 Inicializa Stripe com sua chave secreta
+const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// 🔹 Rota principal só pra teste
+app.use(express.json());
+app.use(cors());
+
+// Rota inicial para teste
 app.get("/", (req, res) => {
   res.send("Servidor Stripe funcionando ✅");
 });
 
-// 🔹 Rota de checkout
-app.post("/checkout", async (req, res) => {
+// Rota para criar checkout
+app.post("/create-checkout-session", async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -24,9 +26,10 @@ app.post("/checkout", async (req, res) => {
           price_data: {
             currency: "brl",
             product_data: {
-              name: "Checkout Express",
+              name: "Compra Premium 💎",
+              description: "Acesso completo por apenas R$10,00",
             },
-            unit_amount: 1000, // 💰 10 reais
+            unit_amount: 1000, // R$10,00
           },
           quantity: 1,
         },
@@ -37,13 +40,20 @@ app.post("/checkout", async (req, res) => {
     });
 
     res.json({ url: session.url });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error("Erro ao criar checkout:", error);
+    res.status(500).json({ error: "Erro ao criar sessão de pagamento" });
   }
 });
 
-// 🔹 Rotas de retorno
-app.get("/sucesso", (req, res) => res.send("✅ Pagamento realizado com sucesso!"));
-app.get("/cancelado", (req, res) => res.send("❌ Pagamento cancelado."));
+// Páginas de sucesso e cancelamento
+app.get("/sucesso", (req, res) => {
+  res.send("✅ Pagamento realizado com sucesso!");
+});
 
-app.listen(10000, () => console.log("Servidor Stripe rodando na porta 10000"));
+app.get("/cancelado", (req, res) => {
+  res.send("❌ Pagamento cancelado!");
+});
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));

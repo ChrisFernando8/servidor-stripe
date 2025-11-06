@@ -13,7 +13,7 @@ app.get("/", (req, res) => {
   res.send("Servidor Stripe funcionando ✅");
 });
 
-// Criar checkout
+// Criar finalização de compra
 app.post("/checkout", async (req, res) => {
   const { name, amount } = req.body;
 
@@ -32,7 +32,7 @@ app.post("/checkout", async (req, res) => {
         },
       ],
       success_url: "https://servidor-stripe.onrender.com/success",
-cancel_url: "https://servidor-stripe.onrender.com/cancel",
+      cancel_url: "https://servidor-stripe.onrender.com/cancel",
     });
 
     res.json({ url: session.url });
@@ -45,22 +45,22 @@ cancel_url: "https://servidor-stripe.onrender.com/cancel",
 // Página de sucesso
 app.get("/success", (req, res) => {
   res.send(`
-    <body style="font-family: Arial; background:#111; color:#0f0; text-align:center; padding:50px;">
-      <h1>✅ Pagamento realizado com sucesso!</h1>
-      <p>Obrigado por apoiar nosso conteúdo 🙏</p>
-      <button onclick="window.location.href='geyser://app'">Voltar ao app</button>
-    </body>
+  <body style="font-family: Arial; background:#111; color:#0f0; text-align:center; padding:50px;">
+    <h1>✅ Pagamento realizado com sucesso!</h1>
+    <p>Obrigado por apoiar nosso conteúdo 🙏</p>
+    <button onclick="window.location.href='geyser://app'">Voltar ao app</button>
+  </body>
   `);
 });
 
 // Página de cancelamento
 app.get("/cancel", (req, res) => {
   res.send(`
-    <body style="font-family: Arial; background:#111; color:#f00; text-align:center; padding:50px;">
-      <h1>❌ Pagamento cancelado</h1>
-      <p>Você pode tentar novamente quando quiser.</p>
-      <button onclick="window.location.href='geyser://app'">Voltar ao app</button>
-    </body>
+  <body style="font-family: Arial; background:#111; color:#f00; text-align:center; padding:50px;">
+    <h1>❌ Pagamento cancelado</h1>
+    <p>Você pode tentar novamente quando quiser.</p>
+    <button onclick="window.location.href='geyser://app'">Voltar ao app</button>
+  </body>
   `);
 });
 
